@@ -6,7 +6,7 @@
 (in-package swank-snapshot)
 
 (defslimefun save-snapshot (image-file)
-  (swank/backend:save-image image-file 
+  (swank/backend:save-image image-file
 			    (let ((c swank::*emacs-connection*))
 			      (lambda () (resurrect c))))
   (format nil "Dumped lisp to ~A" image-file))
@@ -52,10 +52,16 @@
 	 (stream (make-fd-stream fd nil))
 	 (connection (make-connection nil stream style)))
     (let ((*emacs-connection* connection))
-      (when repl (swank-repl:create-repl nil))
-      (background-message "~A" "Lisp image restored"))
-    (serve-requests connection)
-    (simple-repl)))
+      (let ((repl-package (find-package :swank-repl)))
+        (when (and repl repl-package)
+          (multiple-value-bind (create-repl-symbol _)
+              (find-symbol "CREATE-REPL" repl-package)
+            (declare (ignore _))
+            (when (and create-repl-symbol (fboundp create-repl-symbol))
+              (funcall create-repl-symbol nil))))))
+    (background-message "~A" "Lisp image restored"))
+  (serve-requests connection)
+  (simple-repl))
 
 (defun read-command-line-arg (name)
   (let* ((args (command-line-args))

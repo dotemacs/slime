@@ -5,7 +5,7 @@
   "Save&restore memory images without disconnecting"
   (:authors "Helmut Eller <heller@common-lisp.net>")
   (:license "GPL v3")
-  (:swank-dependencies swank-snapshot))
+  (:swank-dependencies swank-snapshot swank-repl))
 
 (defun slime-snapshot (filename &optional background)
   "Save a memory image to the file FILENAME."
